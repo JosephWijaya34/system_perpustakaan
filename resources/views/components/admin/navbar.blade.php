@@ -23,7 +23,7 @@
             <div id="navbar-dropdown" class="hidden md:flex md:items-center md:space-x-8">
                 <ul class="flex flex-col md:flex-row md:space-x-8">
                     <li>
-                        <a href="#"
+                        <a href="/dashboard"
                             class="block py-2 px-4 text-gray-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-500">
                             Dashboard
                         </a>
@@ -48,7 +48,7 @@
                         </a>
                     </li>
                     <li>
-                        <form action="{{ route('logout') }}" method="POST">
+                        <form action="{{ route('admin-logout') }}" method="POST">
                             @csrf
                             <button type="submit"
                                 class="block w-full text-left px-4 py-2 text-red-600 hover:text-red-900">

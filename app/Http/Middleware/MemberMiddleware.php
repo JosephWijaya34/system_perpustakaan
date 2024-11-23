@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class GuestMiddleware
+class MemberMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,13 +16,14 @@ class GuestMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Periksa apakah pengguna sudah login
-        if (Auth::check()) {
-            // Redirect ke halaman dashboard jika sudah login
-            return redirect('/dashboard')->with('status', 'Anda sudah login.');
+        if (!Auth::check()) {
+            // Redirect ke halaman login jika belum login
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+        if (Auth::check() && Auth::user()->role_id !== 2) {
+            return redirect('login')->with('error', 'Hanya member yang dapat mengakses halaman ini.');
         }
 
-        // Jika belum login, lanjutkan ke request berikutnya
         return $next($request);
     }
 }

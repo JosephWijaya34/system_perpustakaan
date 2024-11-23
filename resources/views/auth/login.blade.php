@@ -6,6 +6,16 @@
         @csrf
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h1>
 
+        @if (session('success'))
+            <div class="bg-green-100 text-green-700 p-4 rounded-lg mb-5 border border-green-300">
+                {{ session('success') }}
+            </div>
+        @elseif (session('error'))
+            <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-5 border border-red-300">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <!-- Tampilkan Error -->
         @if ($errors->any())
             <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-5 border border-red-300">
@@ -34,15 +44,6 @@
             <x-slot:placeholder>Enter your password</x-slot:placeholder>
             <x-slot:pattern>.*</x-slot:pattern>
         </x-forms.normal-input>
-
-        <div class="flex items-center justify-between mb-6">
-            <label for="remember" class="flex items-center text-sm text-gray-600">
-                <input type="checkbox" id="remember" name="remember"
-                    class="mr-2 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
-                Remember Me
-            </label>
-            <a href="#" class="text-sm text-blue-500 hover:underline">Forgot Password?</a>
-        </div>
 
         <button type="submit"
             class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition duration-200">

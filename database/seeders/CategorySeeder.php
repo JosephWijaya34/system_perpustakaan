@@ -18,8 +18,16 @@ class CategorySeeder extends Seeder
             ['category_name' => 'Science'],
             ['category_name' => 'Biography'],
             ['category_name' => 'History'],
+            ['category_name' => 'Technology'],
+            ['category_name' => 'Self-Help'],
+            ['category_name' => 'Programming'],
+            ['category_name' => 'Mathematics'],
+            ['category_name' => 'Physics'],
+            ['category_name' => 'Fantasy'],
+            ['category_name' => 'Thriller'],
+            ['category_name' => 'Romance'],
         ];
-        
+
         foreach ($data as $category) {
             Category::create($category);
         }

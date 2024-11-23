@@ -44,6 +44,15 @@
             <x-slot:pattern>.*</x-slot:pattern>
         </x-forms.normal-input>
 
+        <!-- Menggunakan Komponen normal-input untuk phone -->
+        <x-forms.normal-input>
+            <x-slot:judul>Phone</x-slot:judul>
+            <x-slot:type>number</x-slot:type>
+            <x-slot:nama>phone</x-slot:nama>
+            <x-slot:placeholder>Example : 08323424234</x-slot:placeholder>
+            <x-slot:pattern>.*</x-slot:pattern>
+        </x-forms.normal-input>
+
         <!-- Menggunakan Komponen image-input untuk Foto -->
         <x-forms.image-input>
             <x-slot:judul>Upload Profile Picture</x-slot:judul>

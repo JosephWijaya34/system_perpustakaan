@@ -29,6 +29,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
+            'phone' => 'required|numeric',
             'foto' => 'required|image|mimes:jpg,jpeg,png',
             'role_id' => 'required|exists:roles,id',
         ]);
@@ -36,6 +37,12 @@ class AuthController extends Controller
         // Jika validasi gagal
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
+        }
+
+        // Validasi tambahan untuk role_id
+        $request->merge(['role_id' => $request->role_id ?? 2]); // Default ke role member
+        if (!in_array($request->role_id, [1, 2])) {
+            return back()->withErrors(['role_id' => 'Role tidak valid'])->withInput();
         }
 
         // Upload foto (jika ada)
@@ -51,6 +58,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'phone' => $request->phone,
             'foto' => $fotoPath,
             'role_id' => $request->role_id,
         ]);
@@ -62,69 +70,71 @@ class AuthController extends Controller
     public function Login()
     {
         if (Auth::check()) {
-            // Jika pengguna sudah login, redirect ke dashboard
-            return redirect('/dashboard')->with('status', 'Anda sudah login!');
-        }
+            $role = Auth::user()->role_id;
 
-        // Tampilkan halaman login
-        $title = 'Login';
-        return view('auth.login', compact('title'));
+            if ($role == 1) {
+                return redirect()->route('dashboard');
+            } elseif ($role == 2) {
+                return redirect()->route('member.catalogue');
+            }
+        }
+        return view('auth.login', ['title' => 'Login']);
     }
 
     public function ValidateLogin(Request $request)
-{
-    // Validasi format input
-    $validator = Validator::make($request->all(), [
-        'email' => ['required', 'email'],
-        'password' => ['required'],
-    ]);
+    {
+        // Validasi format input
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-    // Jika validasi format gagal
-    if ($validator->fails()) {
-        return back()->withErrors($validator)->withInput();
-    }
-
-    // Cek apakah email ada di database
-    $user = User::where('email', $request->email)->first();
-
-    if (!$user) {
-        // Jika email tidak ditemukan
-        return back()->withErrors([
-            'email' => 'Email tidak ditemukan.',
-        ])->withInput();
-    }
-
-    // Cek apakah password cocok
-    if (!Hash::check($request->password, $user->password)) {
-        // Jika password salah
-        return back()->withErrors([
-            'password' => 'Password salah.',
-        ])->withInput();
-    }
-
-    // Jika kredensial benar, autentikasi pengguna
-    if (Auth::attempt($request->only('email', 'password'))) {
-        // Ambil data user
-        $user = Auth::user();
-
-        // Periksa role
-        if ($user->role_id == 1) {
-            // Regenerate session untuk keamanan
-            $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+        // Jika validasi format gagal
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
         }
 
-        // Logout jika bukan admin
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Cek apakah user dengan email tersebut ada di database
+        $user = User::where('email', $request->email)->first();
 
-        return redirect('login')->with('error', 'Akses tidak diizinkan untuk akun Anda.');
+        if (!$user) {
+            // Jika email tidak ditemukan
+            return back()->withErrors([
+                'email' => 'Email tidak ditemukan.',
+            ])->withInput();
+        }
+
+        // Cek apakah password cocok
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors([
+                'password' => 'Password salah.',
+            ])->withInput();
+        }
+
+        // Jika kredensial benar, autentikasi pengguna
+        if (Auth::attempt($request->only('email', 'password'))) {
+            $request->session()->regenerate();
+
+            // Redirect berdasarkan role
+            $role = Auth::user()->role_id;
+            
+            switch ($role) {
+                case 1: // Admin
+                    return redirect()->route('dashboard');
+                case 2: // Member
+                    return redirect()->route('member.catalogue');
+                default:
+                    // Jika role tidak valid, logout dan redirect
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return redirect()->route('login')->with('error', 'Akun dengan role tidak valid.');
+            }
+        }
+
+        // Jika login gagal karena alasan tidak diketahui
+        return redirect()->route('login')->with('error', 'Gagal login. Silakan coba lagi.');
     }
-
-    // Jika login gagal karena alasan tidak diketahui
-    return redirect()->back()->with('error', 'Gagal login. Silakan coba lagi.');
-}
 
 
     public function Logout(Request $request)
@@ -133,7 +143,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // flush session untuk menghapus semua data session
+        // // flush session untuk menghapus semua data session
         // $request->session()->flush();
 
         // Redirect ke halaman login

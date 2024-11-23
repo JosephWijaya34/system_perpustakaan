@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,9 +17,28 @@ class BookController extends Controller
     public function index()
     {
         $title = 'Book List';
-        $books = Book::paginate(5);
+        $books = Book::with('user')->paginate(5);
 
         return view('admin.books.book-dashboard', compact('title', 'books'));
+    }
+
+    public function confirmReturn(string $id)
+    {
+        $book = Book::findOrFail($id);
+
+        // Pastikan buku sudah ditandai untuk pengembalian
+        if (is_null($book->returned_at)) {
+            return redirect()->route('books.index')->with('error', 'Buku belum ditandai untuk pengembalian.');
+        }
+
+        // Proses konfirmasi pengembalian
+        $book->update([
+            'user_id' => null,        // Lepas user_id
+            'returned_at' => null,    // Reset returned_at
+        ]);
+
+        // Redirect ke halaman index dengan pesan sukses
+        return redirect()->route('books.index')->with('success', 'Pengembalian buku berhasil dikonfirmasi.');
     }
 
     /**
@@ -79,7 +99,7 @@ class BookController extends Controller
         ]);
 
         // Hubungkan kategori ke buku
-        $book->categories()->sync($request->category_id);
+        $book->categories()->attach($request->category_id);
 
         return redirect()->route('books.index')
             ->with('success', 'Book created successfully.');
@@ -114,10 +134,10 @@ class BookController extends Controller
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'description' => 'required|string',
-            'publisher' => 'required|string|max:255',
+            'title' => 'string|max:255',
+            'author' => 'string|max:255',
+            'description' => 'string',
+            'publisher' => 'string|max:255',
             'foto_buku' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'category_id' => 'required|array',
             'category_id.*' => 'exists:categories,id',
@@ -145,10 +165,10 @@ class BookController extends Controller
 
         // Update data buku
         $book->update([
-            'title' => $request->title,
-            'author' => $request->author,
-            'description' => $request->description,
-            'publisher' => $request->publisher,
+            'title' => $request->title ?? $book->title,
+            'author' => $request->author ?? $book->author,
+            'description' => $request->description ?? $book->description,
+            'publisher' => $request->publisher ?? $book->publisher,
         ]);
 
         // Sinkronisasi kategori di pivot table

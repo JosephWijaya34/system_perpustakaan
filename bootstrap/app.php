@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\GuestMiddleware;
+use App\Http\Middleware\MemberMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,9 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'guest' => GuestMiddleware::class,
             'admin' => AdminMiddleware::class,
-            'Role' => RoleMiddleware::class,
+            'member' => MemberMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -32,7 +32,8 @@
                         <th class="py-3 px-6 text-left">No</th>
                         <th class="py-3 px-6 text-left">Title</th>
                         <th class="py-3 px-6 text-left">Author</th>
-                        <th class="py-3 px-6 text-left">Publisher</th>
+                        <th class="py-3 px-6 text-left">Return</th>
+                        <th class="py-3 px-6 text-left">By User</th>
                         <th class="py-3 px-6 text-left">Actions</th>
                     </tr>
                 </thead>
@@ -47,13 +48,20 @@
                                 <td class="py-3 px-6 text-left whitespace-nowrap">{{ $loop->iteration }}</td>
                                 <td class="py-3 px-6 text-left">{{ $book->title }}</td>
                                 <td class="py-3 px-6 text-left">{{ $book->author }}</td>
-                                <td class="py-3 px-6 text-left">{{ $book->publisher }}</td>
+                                <td class="py-3 px-6 text-left">{{ $book->returned_at }}</td>
+                                <td class="py-3 px-6 text-left">{{ $book->user ? $book->user->name : 'Tidak ada user' }}
+                                </td>
                                 <td class="py-3 px-6 text-left">
                                     <div class="flex items-center space-x-4">
-                                        <a href="{{ route('books.show', $book->id) }}"
-                                            class="text-yellow-500 hover:underline">
-                                            Detail
-                                        </a>
+                                        @if ($book->user_id && $book->returned_at && is_null($book->borrowed_at))
+                                            <!-- Tombol Confirm Return -->
+                                            <form action="{{ route('confirm.return', $book->id) }}" method="POST">
+                                                @csrf
+                                                @method('POST')
+                                                <button type="submit" class="text-yellow-500 hover:underline">Confirm
+                                                    Return</button>
+                                            </form>
+                                        @endif
                                         <a href="{{ route('books.edit', $book->id) }}"
                                             class="text-blue-600 hover:underline">Edit</a>
                                         <form action="{{ route('books.destroy', $book->id) }}" method="POST"

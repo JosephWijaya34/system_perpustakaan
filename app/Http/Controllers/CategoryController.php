@@ -90,6 +90,17 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         $category = Category::find($id);
+        if (!$category) {
+            return redirect()->route('categories.index')->with('error', 'Category not found.');
+        }
+
+        // Cek apakah kategori memiliki relasi dengan tabel pivot categories_books
+        if ($category->books()->exists()) {
+            // Detach relasi di tabel pivot
+            $category->books()->detach();
+        }
+
+        // Hapus kategori setelah relasi dihapus
         $category->delete();
 
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
