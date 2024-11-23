@@ -35,7 +35,7 @@ class CategoryController extends Controller
     {
         // Validasi inputan
         $validator = Validator::make($request->all(), [
-            'category_name' => 'required|string|max:255',
+            'category_name' => 'required|string|max:30',
         ]);
 
         // Jika validasi gagal

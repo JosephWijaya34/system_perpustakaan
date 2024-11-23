@@ -29,7 +29,7 @@ Route::middleware('admin')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('users', UserController::class);
 });
-
+    
 // Member routes
 Route::middleware('member')->group(function () {
     Route::post('/member-logout', [AuthController::class, 'Logout'])->name('member-logout');

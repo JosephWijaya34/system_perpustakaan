@@ -55,10 +55,10 @@
                                 <td class="py-3 px-6 text-left">{{ $user->phone }}</td>
                                 <td class="py-3 px-6 text-left">
                                     <div class="flex items-center space-x-4">
-                                        <a href="{{ route('users.show', $user->id) }}"
+                                        {{-- <a href="{{ route('users.show', $user->id) }}"
                                             class="text-yellow-500 hover:underline">
                                             Detail
-                                        </a>
+                                        </a> --}}
                                         <a href="{{ route('users.edit', $user->id) }}"
                                             class="text-blue-600 hover:underline">Edit</a>
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST"
