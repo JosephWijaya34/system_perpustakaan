@@ -13,7 +13,7 @@ class UserListBookController extends Controller
         $title = 'Borrowed Books';
         $user = Auth::user()->id;
         $books = Book::where('user_id', $user)->paginate(5);
-
+        
         return view('user.list-book', compact('title', 'books'));
     }
 
